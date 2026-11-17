@@ -5,8 +5,7 @@ import css from "./navigation-rail.css?inline"
 
 const en = {
   rail: "Conversation turns",
-  retry: "Could not load earlier turns. Try again",
-  retryShort: "Retry",
+  loadError: "Could not load conversation turns",
   attachment: "Attachment",
   emptyPrompt: "User message",
   reply: "Reply",
@@ -14,8 +13,7 @@ const en = {
 
 const zh = {
   rail: "对话轮次",
-  retry: "加载历史失败，点击重试",
-  retryShort: "重试",
+  loadError: "加载历史失败",
   attachment: "附件",
   emptyPrompt: "用户消息",
   reply: "回复",

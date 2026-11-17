@@ -91,26 +91,17 @@
   }
 }
 
-.onr-tick:focus-visible,
-.onr-retry:focus-visible {
+.onr-tick:focus-visible {
   outline: 2px solid var(--v2-border-border-focus, Highlight);
   outline-offset: -2px;
 }
 
-.onr-retry {
+.onr-warning {
   flex: none;
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 20px;
-  color: inherit;
-}
-
-.onr-retry {
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
+  cursor: help;
 }
 
 .onr-preview {

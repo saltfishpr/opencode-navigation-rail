@@ -14,7 +14,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
   const [timeline, setTimeline] = createSignal<TimelineElements>()
   const [wide, setWide] = createSignal(false)
   const [indexed, setIndexed] = createSignal<Turn[]>([])
-  const [loadFailed, setLoadFailed] = createSignal(false)
+  const [loadError, setLoadError] = createSignal<string>()
   const [activeID, setActiveID] = createSignal<string>()
   const [inViewIDs, setInViewIDs] = createSignal(new Set<string>())
   const [hoveredID, setHoveredID] = createSignal<string>()
@@ -52,7 +52,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     const id = hoveredID() ?? focusedID()
     return id && !previewDismissed() ? byID().get(id)?.turn : undefined
   }
-  const shown = () => wide() && (turns().length >= 7 || loadFailed())
+  const shown = () => wide() && (turns().length >= 7 || loadError() !== undefined)
 
   function revealMarker(id: string | undefined) {
     const marker = id && scroller?.querySelector<HTMLButtonElement>(`[data-turn-id="${CSS.escape(id)}"]`)
@@ -111,7 +111,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     preview()
     pointerInside()
     focusInside()
-    loadFailed()
+    loadError()
     if (!shown()) {
       setPointerInside(false)
       setFocusInside(false)
@@ -158,7 +158,6 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     if (request || exhausted) return
     const controller = new AbortController()
     request = controller
-    setLoadFailed(false)
     try {
       let next = cursor
       do {
@@ -186,8 +185,8 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
         cursor = next = following
         exhausted = !next
       } while (next)
-    } catch {
-      if (!controller.signal.aborted) setLoadFailed(true)
+    } catch (error) {
+      if (!controller.signal.aborted) setLoadError(error instanceof Error ? error.message : String(error))
     } finally {
       if (request === controller) request = undefined
     }
@@ -242,79 +241,84 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
                   if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusInside(false)
                 }}
               >
-                <Show when={turns().length >= 7}>
-                  <div
-                    ref={scroller}
-                    class="onr-scroll"
-                    onScroll={() => { setHoveredID(undefined); schedule() }}
-                    onWheel={(event) => event.stopPropagation()}
-                  >
-                    <For each={turnIDs()}>
-                      {(id, index) => (
-                        <div class="onr-item">
-                          <button
-                            type="button"
-                            class="onr-tick"
-                            classList={{ "onr-visible": inViewIDs().has(id), "onr-wave-center": waveIndex() === index() }}
-                            style={{ "--onr-distance": waveIndex() < 0 ? 4 : Math.abs(index() - waveIndex()) }}
-                            data-turn-id={id}
-                            tabIndex={tabStop() === id ? 0 : -1}
-                            aria-label={byID().get(id)?.turn.prompt}
-                            aria-current={activeID() === id ? "location" : undefined}
-                            onClick={() => go(id)}
-                            onKeyDown={(event) => moveFocus(event, id)}
-                            onPointerEnter={() => {
-                              setHoveredID(id)
-                              setPreviewDismissed(false)
-                            }}
-                            onPointerLeave={() => setHoveredID((current) => (current === id ? undefined : current))}
-                            onFocus={() => {
-                              setFocusedID(id)
-                              setPreviewDismissed(false)
-                              revealMarker(id)
-                              schedule()
-                            }}
-                            onBlur={() => setFocusedID((current) => (current === id ? undefined : current))}
-                          >
-                            <span aria-hidden="true" />
-                          </button>
-                        </div>
-                      )}
-                    </For>
-                  </div>
-                </Show>
-                <Show when={preview()} keyed>
-                  {(turn) => (
-                    <div
-                      ref={(element) => { previewCard = element; setPreviewTop(undefined); schedule() }}
-                      class="onr-preview"
-                      style={{
-                        top: `${previewTop() ?? 0}px`,
-                        "max-height": `${bounds().height}px`,
-                        visibility: previewTop() === undefined ? "hidden" : undefined,
-                      }}
-                      aria-hidden="true"
-                    >
-                      <div class="onr-prompt">{turn.prompt}</div>
-                      <Show when={turn.reply}>
-                        <div class="onr-reply">
-                          <span class="onr-reply-label">{props.t("reply")}</span>
-                          {turn.reply}
+                <Show
+                  when={loadError()}
+                  fallback={
+                    <>
+                      <Show when={turns().length >= 7}>
+                        <div
+                          ref={scroller}
+                          class="onr-scroll"
+                          onScroll={() => { setHoveredID(undefined); schedule() }}
+                          onWheel={(event) => event.stopPropagation()}
+                        >
+                          <For each={turnIDs()}>
+                            {(id, index) => (
+                              <div class="onr-item">
+                                <button
+                                  type="button"
+                                  class="onr-tick"
+                                  classList={{ "onr-visible": inViewIDs().has(id), "onr-wave-center": waveIndex() === index() }}
+                                  style={{ "--onr-distance": waveIndex() < 0 ? 4 : Math.abs(index() - waveIndex()) }}
+                                  data-turn-id={id}
+                                  tabIndex={tabStop() === id ? 0 : -1}
+                                  aria-label={byID().get(id)?.turn.prompt}
+                                  aria-current={activeID() === id ? "location" : undefined}
+                                  onClick={() => go(id)}
+                                  onKeyDown={(event) => moveFocus(event, id)}
+                                  onPointerEnter={() => {
+                                    setHoveredID(id)
+                                    setPreviewDismissed(false)
+                                  }}
+                                  onPointerLeave={() => setHoveredID((current) => (current === id ? undefined : current))}
+                                  onFocus={() => {
+                                    setFocusedID(id)
+                                    setPreviewDismissed(false)
+                                    revealMarker(id)
+                                    schedule()
+                                  }}
+                                  onBlur={() => setFocusedID((current) => (current === id ? undefined : current))}
+                                >
+                                  <span aria-hidden="true" />
+                                </button>
+                              </div>
+                            )}
+                          </For>
                         </div>
                       </Show>
-                    </div>
-                  )}
-                </Show>
-                <Show when={loadFailed()}>
-                  <button
-                    type="button"
-                    class="onr-retry"
-                    aria-label={props.t("retry")}
-                    title={props.t("retry")}
-                    onClick={() => void loadHistory()}
-                  >
-                    {props.t("retryShort")}
-                  </button>
+                      <Show when={preview()} keyed>
+                        {(turn) => (
+                          <div
+                            ref={(element) => { previewCard = element; setPreviewTop(undefined); schedule() }}
+                            class="onr-preview"
+                            style={{
+                              top: `${previewTop() ?? 0}px`,
+                              "max-height": `${bounds().height}px`,
+                              visibility: previewTop() === undefined ? "hidden" : undefined,
+                            }}
+                            aria-hidden="true"
+                          >
+                            <div class="onr-prompt">{turn.prompt}</div>
+                            <Show when={turn.reply}>
+                              <div class="onr-reply">
+                                <span class="onr-reply-label">{props.t("reply")}</span>
+                                {turn.reply}
+                              </div>
+                            </Show>
+                          </div>
+                        )}
+                      </Show>
+                    </>
+                  }
+                >
+                  {(reason) => {
+                    const message = () => `${props.t("loadError")}: ${reason()}`
+                    return (
+                      <span class="onr-warning" role="status" aria-label={message()} title={message()}>
+                        ⚠️
+                      </span>
+                    )
+                  }}
                 </Show>
               </nav>
             </Show>
