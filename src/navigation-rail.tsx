@@ -3,7 +3,7 @@ import { batch, createMemo, createSignal, For, onCleanup, onMount, Show } from "
 import { Portal } from "solid-js/web"
 import type { RailLabel } from "./gui"
 import { mergeTurns, olderPageStart, promptTurn, type Turn } from "./turns"
-import { findTimeline, jumpToTurn, readingTurn, type TimelineElements } from "./timeline"
+import { findTimeline, jumpToTurn, readingTurns, type TimelineElements } from "./timeline"
 
 const capacity = 13
 const minimumWidth = 720
@@ -19,6 +19,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
   const [exhausted, setExhausted] = createSignal(false)
   const [loadState, setLoadState] = createSignal<"idle" | "loading" | "error">("idle")
   const [activeID, setActiveID] = createSignal<string>()
+  const [inViewIDs, setInViewIDs] = createSignal(new Set<string>())
   const [pageEndID, setPageEndID] = createSignal<string>()
   const [hoveredID, setHoveredID] = createSignal<string>()
   const [focusedID, setFocusedID] = createSignal<string>()
@@ -46,6 +47,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
   })
   const pageStart = () => Math.max(0, pageEnd() - capacity)
   const visibleIDs = createMemo(() => turns().slice(pageStart(), pageEnd()).map((turn) => turn.id))
+  const waveIndex = createMemo(() => visibleIDs().indexOf(hoveredID() ?? focusedID() ?? ""))
   const tabStop = () => {
     const visible = visibleIDs()
     const focused = focusedID()
@@ -69,7 +71,13 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
       if (!host || !host.root.isConnected) return
       const fits = host.root.clientWidth >= minimumWidth
       setWide(fits)
-      if (fits) setActiveID(readingTurn(host, byID(), turns().at(-1)?.id) ?? activeID())
+      if (fits) {
+        const reading = readingTurns(host, byID(), turns().at(-1)?.id)
+        batch(() => {
+          setActiveID(reading.activeID ?? activeID())
+          setInViewIDs(reading.visibleIDs)
+        })
+      }
     }
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update)
@@ -206,7 +214,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
       <Show when={timeline()} keyed>
         {(host) => (
           <Portal mount={host.root}>
-            <Show when={wide() && (turns().length > 1 || mayHaveOlder())}>
+            <Show when={wide() && turns().length >= 7}>
               <nav ref={nav} class="onr" aria-label={props.t("rail")}>
                 <Show when={showEarlier()}>
                   <button
@@ -227,7 +235,8 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
                       <button
                         type="button"
                         class="onr-tick"
-                        classList={{ "onr-current": activeID() === id }}
+                        classList={{ "onr-visible": inViewIDs().has(id), "onr-wave-center": waveIndex() === index() }}
+                        style={{ "--onr-distance": waveIndex() < 0 ? 4 : Math.abs(index() - waveIndex()) }}
                         data-turn-id={id}
                         tabIndex={tabStop() === id ? 0 : -1}
                         aria-label={byID().get(id)?.turn.prompt}
@@ -249,11 +258,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
                       </button>
                       <Show when={preview()?.id === id ? preview() : undefined} keyed>
                         {(turn) => (
-                          <div
-                            class="onr-preview"
-                            classList={{ "onr-preview-up": index() >= Math.ceil(visibleIDs().length / 2) }}
-                            aria-hidden="true"
-                          >
+                          <div class="onr-preview" aria-hidden="true">
                             <div class="onr-prompt">{turn.prompt}</div>
                             <Show when={turn.reply}>
                               <div class="onr-reply">

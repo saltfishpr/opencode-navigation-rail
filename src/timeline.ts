@@ -17,17 +17,18 @@ export function findTimeline(anchor: HTMLElement): TimelineElements | undefined 
   if (root && viewport && content) return { root, viewport, content }
 }
 
-export function readingTurn(
+export function readingTurns(
   timeline: TimelineElements,
   known: { has(id: string): boolean },
   latestID: string | undefined,
-): string | undefined {
+): { activeID: string | undefined; visibleIDs: Set<string> } {
   const { viewport, content } = timeline
-  if (latestID && viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop <= 2) return latestID
+  const atBottom = viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop <= 2
 
   const top = viewport.getBoundingClientRect().top
   const inset = viewport.querySelector<HTMLElement>(titleSelector)?.offsetHeight ?? 0
   const line = top + inset + 4
+  const visibleIDs = new Set<string>()
   let before: { id: string; top: number } | undefined
   let after: { id: string; top: number } | undefined
 
@@ -37,6 +38,7 @@ export function readingTurn(
 
     const box = row.getBoundingClientRect()
     if (!box.height) continue
+    if (box.bottom > top + inset && box.top < top + viewport.clientHeight) visibleIDs.add(id)
     if (box.top <= line) {
       if (!before || box.top >= before.top) before = { id, top: box.top }
     } else if (box.top < top + viewport.clientHeight && (!after || box.top < after.top)) {
@@ -44,7 +46,7 @@ export function readingTurn(
     }
   }
 
-  return before?.id ?? after?.id
+  return { activeID: atBottom && latestID ? latestID : before?.id ?? after?.id, visibleIDs }
 }
 
 export function jumpToTurn(id: string, timeline: TimelineElements): void {

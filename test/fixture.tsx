@@ -15,9 +15,9 @@ const reply = {
   time: { created: 5.1, completed: 5.2 },
   content: [{ type: "text", text: "A long reply to the fifth prompt." }],
 }
-const recent = [user(5), reply, user(6), user(7), user(8)]
-const older = [user(1), { ...user(2, ""), files: [{ name: "notes.txt" }] }, user(3), user(4)]
-const queued = user(9, "Queued prompt")
+const recent = [user(4), user(5), reply, user(6), user(7), user(8), user(9), user(10)]
+const older = [user(1), { ...user(2, ""), files: [{ name: "notes.txt" }] }, user(3)]
+const queued = user(11, "Queued prompt")
 const [messages, setMessages] = createSignal([...recent, queued])
 const [more, setMore] = createSignal(true)
 const [active, setActive] = createSignal(true)

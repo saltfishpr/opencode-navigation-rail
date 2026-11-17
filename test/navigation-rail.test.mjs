@@ -35,14 +35,14 @@ async function fixture() {
   return page
 }
 
-const tick = (id) => page.locator(`[data-turn-id="msg_00${id}"]`)
+const tick = (id) => page.locator(`[data-turn-id="msg_${String(id).padStart(3, "0")}"]`)
 const scroller = () => page.locator(".scroll-view__viewport")
 
 test("the compiled GUI registers the rail, reads assistant rows and supports keyboard navigation", async () => {
   await fixture()
-  assert.equal(await page.locator(".onr-tick").count(), 4)
-  assert.equal(await tick(8).getAttribute("aria-current"), "location")
-  assert.equal(await tick(9).count(), 0)
+  assert.equal(await page.locator(".onr-tick").count(), 7)
+  assert.equal(await tick(10).getAttribute("aria-current"), "location")
+  assert.equal(await tick(11).count(), 0)
 
   await scroller().evaluate((node) => { node.scrollTop = 850 })
   await page.waitForFunction(() => document.querySelector('[aria-current="location"]')?.dataset.turnId === "msg_005")
