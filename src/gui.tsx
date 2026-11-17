@@ -33,7 +33,7 @@ export default Plugin.define({
       at: "session.header",
       render: (input) => (
         <Show when={input.active && !input.session.pending && input.session.visit} keyed>
-          <NavigationRail session={input.session} t={(key) => ctx.t(key)} />
+          <NavigationRail session={input.session} t={(key) => ctx.t(key)} path={() => ctx.router.path()} />
         </Show>
       ),
     })

@@ -49,27 +49,39 @@ export function readingTurns(
   return { activeID: atBottom && latestID ? latestID : before?.id ?? after?.id, visibleIDs }
 }
 
-export function jumpToTurn(id: string, timeline: TimelineElements): void {
+export async function jumpToTurn(id: string, timeline: TimelineElements, path: string): Promise<void> {
   const hash = "#message-" + id
-  if (window.location.hash !== hash) {
-    window.location.hash = hash
-    return
+  const { root, viewport, content } = timeline
+  const document = root.ownerDocument
+  function navigate(hash: string) {
+    // Desktop's MemoryRouter intercepts route links, not changes to window.location.
+    const link = document.createElement("a")
+    link.href = path + hash
+    link.hidden = true
+    link.setAttribute("link", "")
+    link.setAttribute("replace", "")
+    link.setAttribute("noscroll", "")
+    root.append(link)
+    try {
+      link.click()
+    } finally {
+      link.remove()
+    }
   }
 
-  // Re-selecting a mounted prompt with an identical hash would otherwise be a browser no-op.
-  const { viewport, content } = timeline
-  const row = viewport.ownerDocument.getElementById(hash.slice(1))
+  const row = document.getElementById(hash.slice(1))
   if (row && content.contains(row)) {
+    navigate(hash)
+    // The router ignores an identical target, so mounted prompts also scroll directly.
     const inset = viewport.querySelector<HTMLElement>(titleSelector)?.offsetHeight ?? 0
     const top = row.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop - inset
     viewport.scrollTo({ top: Math.max(0, top), behavior: "instant" })
     return
   }
 
-  // A repeated hash for a virtual row still needs to pass through the router.
-  const url = new URL(window.location.href)
-  url.hash = ""
-  window.history.replaceState(window.history.state, "", url)
-  window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }))
-  window.location.hash = hash
+  // Re-arm even an identical virtual target. Let the router apply the clear before the target,
+  // within the same frame so the host's scheduled scroll-to-end is superseded by the seek.
+  navigate("")
+  await Promise.resolve()
+  if (root.isConnected) navigate(hash)
 }

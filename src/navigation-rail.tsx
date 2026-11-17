@@ -7,7 +7,7 @@ import { findTimeline, jumpToTurn, readingTurns, type TimelineElements } from ".
 
 const minimumWidth = 720
 
-export function NavigationRail(props: { session: MountedSession; t: (key: RailLabel) => string }) {
+export function NavigationRail(props: { session: MountedSession; t: (key: RailLabel) => string; path: () => string }) {
   const id = props.session.id
   const data = () => props.session.server.data
   const labels = () => ({ attachment: props.t("attachment"), emptyPrompt: props.t("emptyPrompt") })
@@ -198,7 +198,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     const host = timeline()
     if (!host || !byID().has(id)) return
     setPreviewDismissed(true)
-    jumpToTurn(id, host)
+    void jumpToTurn(id, host, props.path())
   }
 
   function moveFocus(event: KeyboardEvent, id: string) {
