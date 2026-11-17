@@ -1,0 +1,137 @@
+.onr-anchor {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.onr {
+  position: absolute;
+  z-index: 20;
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 1px;
+  width: 25px;
+  color: var(--v2-text-text-base, CanvasText);
+  -webkit-app-region: no-drag;
+}
+
+.onr-item {
+  position: relative;
+  min-width: 0;
+}
+
+.onr-tick,
+.onr-page {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 15px;
+  margin: 0;
+  padding: 0 2px 0 3px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.onr-tick > span {
+  display: block;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.29;
+}
+
+.onr-tick:is(:hover, :focus-visible) > span,
+.onr-tick.onr-current > span {
+  width: 20px;
+  opacity: 0.9;
+}
+
+.onr-tick:focus-visible,
+.onr-page:focus-visible {
+  outline: 2px solid var(--v2-border-border-focus, Highlight);
+  outline-offset: -2px;
+}
+
+.onr-page {
+  justify-content: center;
+}
+
+.onr-page > span {
+  width: 5px;
+  height: 5px;
+  border: solid currentColor;
+  border-width: 1px 0 0 1px;
+  transform: translateY(1px) rotate(45deg);
+  opacity: 0.64;
+}
+
+.onr-page-later > span {
+  transform: translateY(-1px) rotate(225deg);
+}
+
+.onr-page[aria-busy="true"] {
+  cursor: progress;
+}
+
+.onr-preview {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: calc(100% + 8px);
+  width: clamp(230px, 42vw, 345px);
+  max-width: calc(100vw - 64px);
+  padding: 10px 12px;
+  border: 1px solid var(--v2-border-border-base, color-mix(in srgb, CanvasText 13%, Canvas));
+  border-radius: 10px;
+  background: var(--v2-background-bg-base, Canvas);
+  color: var(--v2-text-text-base, CanvasText);
+  box-shadow: var(--v2-elevation-raised, 0 4px 16px #0002);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.onr-preview-up {
+  top: auto;
+  bottom: 0;
+}
+
+.onr-prompt,
+.onr-reply {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.onr-prompt {
+  -webkit-line-clamp: 3;
+  font-weight: 600;
+}
+
+.onr-reply {
+  -webkit-line-clamp: 3;
+  margin-top: 5px;
+  color: var(--v2-text-text-muted, CanvasText);
+}
+
+.onr-reply-label {
+  margin-inline-end: 0.45em;
+}
+
+.onr-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

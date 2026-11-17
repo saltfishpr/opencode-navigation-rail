@@ -1,0 +1,32 @@
+{
+  "name": "opencode-navigation-rail",
+  "version": "0.1.0",
+  "description": "Conversation turn navigation for OpenCode Desktop",
+  "type": "module",
+  "exports": {
+    "./gui-experimental": "./dist/gui-experimental.cjs"
+  },
+  "files": [
+    "dist/gui-experimental.cjs"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@opencode/client": "2.3.0",
+    "@opencode/plugin": "2.3.0",
+    "@types/node": "^22.0.0",
+    "playwright": "^1.65.1",
+    "solid-js": "^1.9.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vite-plugin-solid": "^2.11.0"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}
