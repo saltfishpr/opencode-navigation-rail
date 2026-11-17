@@ -5,11 +5,9 @@ import css from "./navigation-rail.css?inline"
 
 const en = {
   rail: "Conversation turns",
-  earlier: "Earlier turns",
-  later: "Later turns",
-  load: "Load earlier turns",
-  loading: "Loading earlier turns…",
+  loading: "Loading conversation turns…",
   retry: "Could not load earlier turns. Try again",
+  retryShort: "Retry",
   attachment: "Attachment",
   emptyPrompt: "User message",
   reply: "Reply",
@@ -17,11 +15,9 @@ const en = {
 
 const zh = {
   rail: "对话轮次",
-  earlier: "更早的轮次",
-  later: "更新的轮次",
-  load: "加载更早的轮次",
-  loading: "正在加载更早的轮次…",
+  loading: "正在加载全部提问…",
   retry: "加载历史失败，点击重试",
+  retryShort: "重试",
   attachment: "附件",
   emptyPrompt: "用户消息",
   reply: "回复",

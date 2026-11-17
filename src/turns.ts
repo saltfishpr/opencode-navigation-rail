@@ -73,12 +73,3 @@ export function mergeTurns(
 
   return [...turns.values()].sort((a, b) => a.created - b.created || (a.id < b.id ? -1 : a.id === b.id ? 0 : 1))
 }
-
-export function olderPageStart(
-  turns: readonly Turn[],
-  firstVisibleID: string | undefined,
-  capacity: number,
-): number {
-  const index = firstVisibleID ? turns.findIndex((turn) => turn.id === firstVisibleID) : -1
-  return Math.max(0, (index < 0 ? 0 : index) - capacity)
-}

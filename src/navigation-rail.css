@@ -9,13 +9,36 @@
   position: absolute;
   z-index: 20;
   left: 12px;
-  top: 50%;
   transform: translateY(-50%);
-  display: grid;
-  gap: 1px;
+  display: flex;
+  flex-direction: column;
   width: 45px;
   color: var(--v2-text-text-base, CanvasText);
   -webkit-app-region: no-drag;
+}
+
+.onr-scroll {
+  display: grid;
+  grid-auto-rows: 12px;
+  gap: 1px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 var(--onr-fade-top, 0px), #000 calc(100% - var(--onr-fade-bottom, 0px)), transparent);
+}
+
+.onr-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.onr-above {
+  --onr-fade-top: 8px;
+}
+
+.onr-below {
+  --onr-fade-bottom: 8px;
 }
 
 .onr-item {
@@ -23,8 +46,7 @@
   min-width: 0;
 }
 
-.onr-tick,
-.onr-page {
+.onr-tick {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -70,37 +92,34 @@
 }
 
 .onr-tick:focus-visible,
-.onr-page:focus-visible {
+.onr-retry:focus-visible {
   outline: 2px solid var(--v2-border-border-focus, Highlight);
   outline-offset: -2px;
 }
 
-.onr-page {
-  justify-content: center;
+.onr-loading,
+.onr-retry {
+  flex: none;
+  text-align: center;
+  font-size: 11px;
+  line-height: 20px;
+  color: inherit;
 }
 
-.onr-page > span {
-  width: 5px;
-  height: 5px;
-  border: solid currentColor;
-  border-width: 1px 0 0 1px;
-  transform: translateY(1px) rotate(45deg);
-  opacity: 0.64;
-}
-
-.onr-page-later > span {
-  transform: translateY(-1px) rotate(225deg);
-}
-
-.onr-page[aria-busy="true"] {
-  cursor: progress;
+.onr-retry {
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
 }
 
 .onr-preview {
   position: absolute;
   z-index: 1;
-  top: calc(50% - 1px);
   left: calc(100% + 8px);
+  box-sizing: border-box;
+  overflow: hidden;
   width: clamp(230px, 42vw, 345px);
   max-width: calc(100vw - 64px);
   padding: 10px 12px;
@@ -135,13 +154,4 @@
 
 .onr-reply-label {
   margin-inline-end: 0.45em;
-}
-
-.onr-sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
