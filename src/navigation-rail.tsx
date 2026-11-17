@@ -52,7 +52,11 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     const id = hoveredID() ?? focusedID()
     return id && !previewDismissed() ? byID().get(id)?.turn : undefined
   }
-  const shown = () => wide() && (turns().length >= 7 || loadError() !== undefined)
+  const warning = () => {
+    const reason = loadError()
+    return reason === undefined ? undefined : `${props.t("loadError")}: ${reason}`
+  }
+  const shown = () => wide() && (turns().length >= 7 || warning() !== undefined)
 
   function revealMarker(id: string | undefined) {
     const marker = id && scroller?.querySelector<HTMLButtonElement>(`[data-turn-id="${CSS.escape(id)}"]`)
@@ -242,50 +246,48 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
                 }}
               >
                 <Show
-                  when={loadError()}
+                  when={warning()}
                   fallback={
                     <>
-                      <Show when={turns().length >= 7}>
-                        <div
-                          ref={scroller}
-                          class="onr-scroll"
-                          onScroll={() => { setHoveredID(undefined); schedule() }}
-                          onWheel={(event) => event.stopPropagation()}
-                        >
-                          <For each={turnIDs()}>
-                            {(id, index) => (
-                              <div class="onr-item">
-                                <button
-                                  type="button"
-                                  class="onr-tick"
-                                  classList={{ "onr-visible": inViewIDs().has(id), "onr-wave-center": waveIndex() === index() }}
-                                  style={{ "--onr-distance": waveIndex() < 0 ? 4 : Math.abs(index() - waveIndex()) }}
-                                  data-turn-id={id}
-                                  tabIndex={tabStop() === id ? 0 : -1}
-                                  aria-label={byID().get(id)?.turn.prompt}
-                                  aria-current={activeID() === id ? "location" : undefined}
-                                  onClick={() => go(id)}
-                                  onKeyDown={(event) => moveFocus(event, id)}
-                                  onPointerEnter={() => {
-                                    setHoveredID(id)
-                                    setPreviewDismissed(false)
-                                  }}
-                                  onPointerLeave={() => setHoveredID((current) => (current === id ? undefined : current))}
-                                  onFocus={() => {
-                                    setFocusedID(id)
-                                    setPreviewDismissed(false)
-                                    revealMarker(id)
-                                    schedule()
-                                  }}
-                                  onBlur={() => setFocusedID((current) => (current === id ? undefined : current))}
-                                >
-                                  <span aria-hidden="true" />
-                                </button>
-                              </div>
-                            )}
-                          </For>
-                        </div>
-                      </Show>
+                      <div
+                        ref={scroller}
+                        class="onr-scroll"
+                        onScroll={() => { setHoveredID(undefined); schedule() }}
+                        onWheel={(event) => event.stopPropagation()}
+                      >
+                        <For each={turnIDs()}>
+                          {(id, index) => (
+                            <div class="onr-item">
+                              <button
+                                type="button"
+                                class="onr-tick"
+                                classList={{ "onr-visible": inViewIDs().has(id), "onr-wave-center": waveIndex() === index() }}
+                                style={{ "--onr-distance": waveIndex() < 0 ? 4 : Math.abs(index() - waveIndex()) }}
+                                data-turn-id={id}
+                                tabIndex={tabStop() === id ? 0 : -1}
+                                aria-label={byID().get(id)?.turn.prompt}
+                                aria-current={activeID() === id ? "location" : undefined}
+                                onClick={() => go(id)}
+                                onKeyDown={(event) => moveFocus(event, id)}
+                                onPointerEnter={() => {
+                                  setHoveredID(id)
+                                  setPreviewDismissed(false)
+                                }}
+                                onPointerLeave={() => setHoveredID((current) => (current === id ? undefined : current))}
+                                onFocus={() => {
+                                  setFocusedID(id)
+                                  setPreviewDismissed(false)
+                                  revealMarker(id)
+                                  schedule()
+                                }}
+                                onBlur={() => setFocusedID((current) => (current === id ? undefined : current))}
+                              >
+                                <span aria-hidden="true" />
+                              </button>
+                            </div>
+                          )}
+                        </For>
+                      </div>
                       <Show when={preview()} keyed>
                         {(turn) => (
                           <div
@@ -311,14 +313,11 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
                     </>
                   }
                 >
-                  {(reason) => {
-                    const message = () => `${props.t("loadError")}: ${reason()}`
-                    return (
-                      <span class="onr-warning" role="status" aria-label={message()} title={message()}>
-                        ⚠️
-                      </span>
-                    )
-                  }}
+                  {(message) => (
+                    <span class="onr-warning" role="status" aria-label={message()} title={message()}>
+                      ⚠️
+                    </span>
+                  )}
                 </Show>
               </nav>
             </Show>
