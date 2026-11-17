@@ -1,45 +1,61 @@
-# opencode-navigation-rail
+# OpenCode Navigation Rail
 
-OpenCode Desktop 的对话轮次导航条。对话左侧的每条短线对应一条用户提问。悬停或用键盘聚焦可预览提问和已加载的回复摘要，点击可跳到提问开头。
+在 OpenCode Desktop 的对话左侧预览历史提问，快速跳转到对应轮次。
+
+## 功能
+
+- **历史导航**：自动读取全部用户提问，支持长会话。
+- **提问预览**：悬停或聚焦短线，查看提问和已有的回复摘要。
+- **阅读高亮**：标出正文可视区域内的轮次，回复可见时也会高亮所属轮次。
+- **融入 OpenCode**：界面跟随语言和主题，提供中文与英文，支持键盘操作和系统减少动态效果设置。
 
 ## 安装
 
-1. 解压项目到一个固定目录。下载包已包含 `dist/gui-experimental.cjs`，可以直接加载。
-2. 把项目目录的 `file:` URL 加入全局 `~/.config/opencode/opencode.jsonc` 的 `plugins`。如果已有其他插件，把该 URL 追加到数组中。
+适用于 **OpenCode Desktop 2.3.0**。其他版本可能需要适配。
 
-   ```jsonc
-   {
-     "plugins": ["file:///Users/fish/plugins/opencode-navigation-rail"]
-   }
-   ```
+下载或克隆本仓库，仓库已包含构建好的插件。
 
-   把示例路径换成自己的绝对路径。Windows 路径示例为 `file:///C:/Users/fish/plugins/opencode-navigation-rail`。
-3. 重新打开 OpenCode Desktop，在 **Settings → Extensions → Plugins** 确认插件已启用。打开一个有多轮对话的会话，把正文列展开到至少 720 px。
+在全局配置 `~/.config/opencode/opencode.json` 或 `opencode.jsonc` 的 `plugins` 数组中追加插件目录的绝对路径。保留已有配置，将示例路径替换为实际下载位置：
 
-## 使用
-
-- 较深的短线标出正文可视区域内的轮次，可以同时有多条；回复可见时也会高亮所属轮次。短线按从旧到新的顺序显示。
-- 悬停某条标记或用键盘聚焦时，该标记显示为深色长线，上下相邻线逐级缩短形成波形，其余线保持浅色。离开导航条且没有键盘聚焦标记时，恢复可视区域高亮。系统启用减少动态效果时，关闭线长过渡动画。
-- 预览框固定显示在标记右下方，顶部与深色长线的顶部对齐。
-- 顶部箭头浏览更早的轮次。需要历史提问时，插件单独分页读取提问摘要，预览期间保留正文的滚动位置。
-- 用 Tab 进入导航条，↑ / ↓ 在当前页的短线之间移动，Home / End 跳到当前页的第一条或最后一条。按 Enter 或 Space 跳转，按 Esc 关闭预览。
-- 正文列太窄，或已加载的用户提问不足 7 条时，导航条自动隐藏；回复和排队中的消息不计入数量。
-
-## 开发
-
-需要 Node.js 20.19+ 或 22.12+。从项目目录运行以下命令。
-
-```sh
-npm ci
-npm run typecheck
-npm run build
-npm run dev
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": [
+    "/absolute/path/to/opencode-navigation-rail",
+  ],
+}
 ```
 
-`npm run dev` 监听源码变化并重新构建插件。OpenCode Desktop 会重载本地插件的 GUI。运行浏览器回归测试前，使用 `npx playwright install chromium` 安装 Chromium，再运行 `npm test`。也可以用环境变量 `CHROMIUM_PATH` 指定本机的 Chromium 路径。
+保存后自动加载，无需重启或额外配置。可在 **Settings → Extensions → Plugins** 中停用插件。
 
-## 兼容性
+## 浏览与跳转
 
-目标版本为 OpenCode Desktop **v2.3.0**。插件使用 `@opencode/plugin/gui`、`./gui-experimental` 和官方 Vite preset 打包。左侧浮层、滚动高亮和消息锚点使用 Desktop v2.3.0 的内部 DOM 与 `#message-<id>` 路由。升级 Desktop 后，可用同一会话验证这三项交互。
+打开会话，将正文列展开到至少 **720 px**。有效用户提问达到 **7 条**后，对话左侧自动显示导航短线，每条对应一条提问，按从旧到新的顺序排列。
 
-[OpenCode GUI 插件规范](https://opencode.ai/docs/build/plugins/gui)
+悬停或用键盘聚焦短线时，该短线变为深色长线，相邻短线逐级缩短形成波形，右侧显示预览。点击短线跳到对应提问的开头。鼠标和键盘焦点均离开导航条后，短线恢复正文可视区域的高亮，可以同时高亮多个轮次。
+
+短线没有条数上限。超出可用高度时，在导航条内使用滚轮或触控板浏览，上下边缘的淡出效果提示还有内容；滚动导航条不会带动正文。预览框保持在正文可视区域内。
+
+正文滚动时，导航条跟随当前阅读轮次。鼠标或键盘焦点位于导航条内时暂停跟随，退出后恢复。
+
+键盘操作：
+
+| 操作 | 按键 |
+| --- | --- |
+| 进入或离开导航条 | Tab / Shift+Tab |
+| 上下选择提问 | ↑ / ↓ |
+| 移到第一条或最后一条提问 | Home / End |
+| 跳到选中的提问 | Enter / Space |
+| 关闭预览 | Esc |
+
+## 历史加载
+
+打开会话后，插件自动分批读取全部用户提问，逐步补齐导航，并保留正文的滚动位置。底部的 `···` 表示正在加载；加载失败时保留已有短线，点击“重试”继续读取。
+
+历史提问读取独立于导航条的显示条件。正文列较窄或提问不足 7 条时仍会加载，加载或错误提示可在提问不足 7 条时显示。
+
+## 使用范围
+
+- 导航仅包含有效用户提问，排队中的提问和回滚边界及之后的提问不计入数量。
+- 回复摘要来自 OpenCode 已加载且已完成的回复文本，不包含推理和工具输出；历史提问可能只有提问预览。
+- 自动读取提问不会预加载历史回复或工具结果。点击历史短线后，由 OpenCode 加载并定位目标正文。
