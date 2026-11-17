@@ -5,7 +5,6 @@ import css from "./navigation-rail.css?inline"
 
 const en = {
   rail: "Conversation turns",
-  loading: "Loading conversation turns…",
   retry: "Could not load earlier turns. Try again",
   retryShort: "Retry",
   attachment: "Attachment",
@@ -15,7 +14,6 @@ const en = {
 
 const zh = {
   rail: "对话轮次",
-  loading: "正在加载全部提问…",
   retry: "加载历史失败，点击重试",
   retryShort: "重试",
   attachment: "附件",

@@ -14,7 +14,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
   const [timeline, setTimeline] = createSignal<TimelineElements>()
   const [wide, setWide] = createSignal(false)
   const [indexed, setIndexed] = createSignal<Turn[]>([])
-  const [loadState, setLoadState] = createSignal<"idle" | "loading" | "error">("idle")
+  const [loadFailed, setLoadFailed] = createSignal(false)
   const [activeID, setActiveID] = createSignal<string>()
   const [inViewIDs, setInViewIDs] = createSignal(new Set<string>())
   const [hoveredID, setHoveredID] = createSignal<string>()
@@ -52,7 +52,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     const id = hoveredID() ?? focusedID()
     return id && !previewDismissed() ? byID().get(id)?.turn : undefined
   }
-  const shown = () => wide() && (turns().length >= 7 || loadState() !== "idle")
+  const shown = () => wide() && (turns().length >= 7 || loadFailed())
 
   function revealMarker(id: string | undefined) {
     const marker = id && scroller?.querySelector<HTMLButtonElement>(`[data-turn-id="${CSS.escape(id)}"]`)
@@ -111,7 +111,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     preview()
     pointerInside()
     focusInside()
-    loadState()
+    loadFailed()
     if (!shown()) {
       setPointerInside(false)
       setFocusInside(false)
@@ -158,7 +158,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     if (request || exhausted) return
     const controller = new AbortController()
     request = controller
-    setLoadState("loading")
+    setLoadFailed(false)
     try {
       let next = cursor
       do {
@@ -186,9 +186,8 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
         cursor = next = following
         exhausted = !next
       } while (next)
-      setLoadState("idle")
     } catch {
-      if (!controller.signal.aborted) setLoadState("error")
+      if (!controller.signal.aborted) setLoadFailed(true)
     } finally {
       if (request === controller) request = undefined
     }
@@ -306,7 +305,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
                     </div>
                   )}
                 </Show>
-                <Show when={loadState() === "error"}>
+                <Show when={loadFailed()}>
                   <button
                     type="button"
                     class="onr-retry"
@@ -316,11 +315,6 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
                   >
                     {props.t("retryShort")}
                   </button>
-                </Show>
-                <Show when={loadState() === "loading"}>
-                  <span class="onr-loading" role="status" aria-label={props.t("loading")} title={props.t("loading")}>
-                    <span aria-hidden="true">···</span>
-                  </span>
                 </Show>
               </nav>
             </Show>
