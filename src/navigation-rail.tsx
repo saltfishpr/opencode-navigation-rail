@@ -77,7 +77,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     if (!host || !host.root.isConnected) return
     const root = host.root.getBoundingClientRect()
     const viewport = host.viewport.getBoundingClientRect()
-    const titleHeight = host.viewport.querySelector<HTMLElement>("[data-session-title]")?.offsetHeight ?? 0
+    const titleHeight = host.root.querySelector<HTMLElement>("[data-session-title]")?.offsetHeight ?? 0
     const top = Math.max(root.top, viewport.top + titleHeight, 0) + 24
     const bottom = Math.min(root.bottom, viewport.bottom, window.innerHeight) - 24
     const height = Math.max(0, bottom - top)

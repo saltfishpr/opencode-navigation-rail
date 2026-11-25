@@ -10,7 +10,13 @@ export interface TimelineElements {
 }
 
 export function findTimeline(anchor: HTMLElement): TimelineElements | undefined {
-  const scroll = anchor.closest<HTMLElement>(scrollSelector)
+  let scroll = anchor.closest<HTMLElement>(scrollSelector)
+  let scope = anchor.parentElement
+  // Since Desktop 2.4.1, the header is a sibling of the scroll container.
+  while (!scroll && scope) {
+    scroll = scope.querySelector<HTMLElement>(scrollSelector)
+    scope = scope.parentElement
+  }
   const root = scroll?.parentElement
   const viewport = scroll?.querySelector<HTMLElement>(viewportSelector)
   const content = viewport?.querySelector<HTMLElement>("[data-timeline-virtual-content]")
@@ -22,11 +28,11 @@ export function readingTurns(
   known: { has(id: string): boolean },
   latestID: string | undefined,
 ): { activeID: string | undefined; visibleIDs: Set<string> } {
-  const { viewport, content } = timeline
+  const { root, viewport, content } = timeline
   const atBottom = viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop <= 2
 
   const top = viewport.getBoundingClientRect().top
-  const inset = viewport.querySelector<HTMLElement>(titleSelector)?.offsetHeight ?? 0
+  const inset = root.querySelector<HTMLElement>(titleSelector)?.offsetHeight ?? 0
   const line = top + inset + 4
   const visibleIDs = new Set<string>()
   let before: { id: string; top: number } | undefined
@@ -73,7 +79,7 @@ export async function jumpToTurn(id: string, timeline: TimelineElements, path: s
   if (row && content.contains(row)) {
     navigate(hash)
     // The router ignores an identical target, so mounted prompts also scroll directly.
-    const inset = viewport.querySelector<HTMLElement>(titleSelector)?.offsetHeight ?? 0
+    const inset = root.querySelector<HTMLElement>(titleSelector)?.offsetHeight ?? 0
     const top = row.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop - inset
     viewport.scrollTo({ top: Math.max(0, top), behavior: "instant" })
     return
