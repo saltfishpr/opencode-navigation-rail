@@ -34,6 +34,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
   let cursor: string | undefined
   let exhausted = false
   let frame = 0
+  const deletions: string[] = []
 
   const pending = createMemo(() => new Set(data().session.input.list(id)))
   const revert = () => data().session.get(id)?.revert?.messageID
@@ -128,6 +129,12 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
   onMount(() => {
     let observer: MutationObserver | undefined
     let resize: ResizeObserver | undefined
+    // A committed revert deletes the messages from its boundary onward, but the history index keeps its own copies.
+    const unsubscribe = data().listen(({ details }) => {
+      if (details.type !== "session.revert.committed" || details.data.sessionID !== id) return
+      deletions.push(details.data.to)
+      setIndexed((seen) => seen.filter((turn) => turn.id < details.data.to))
+    })
     const connect = () => {
       frame = 0
       if (!railAnchor.isConnected) return
@@ -148,6 +155,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
     frame = requestAnimationFrame(connect)
     void loadHistory()
     onCleanup(() => {
+      unsubscribe()
       const host = timeline()
       host?.viewport.removeEventListener("scroll", schedule)
       window.removeEventListener("resize", schedule)
@@ -166,6 +174,7 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
       let next = cursor
       do {
         // Keep the full prompt index separate from the host's window of heavy transcript messages.
+        const pendingDeletions = deletions.length
         const page = await props.session.server.client.message.list(
           { sessionID: id, type: "user", limit: 100, cursor: next },
           { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]) },
@@ -174,8 +183,10 @@ export function NavigationRail(props: { session: MountedSession; t: (key: RailLa
 
         const following = page.cursor.next ?? undefined
         if (following && following === next) throw new Error("History cursor did not advance")
+        // A revert committed while this page was in flight deleted prompts the page still carries.
+        const deleted = deletions.slice(pendingDeletions)
         const older = page.data.flatMap((message) =>
-          message.type === "user" ? [promptTurn(message, labels())] : [],
+          message.type === "user" && deleted.every((to) => message.id < to) ? [promptTurn(message, labels())] : [],
         )
         // Prepending history must not move the marker the user is browsing.
         const viewTop = scroller?.getBoundingClientRect().top ?? 0
