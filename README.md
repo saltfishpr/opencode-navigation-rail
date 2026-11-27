@@ -15,7 +15,7 @@
 
 ## 安装
 
-适用于 **OpenCode Desktop 2.3.0、2.4.1**。其他版本可能需要适配。
+适用于 **OpenCode Desktop 2.3.0、2.4.x**。其他版本可能需要适配。
 
 下载或克隆本仓库，仓库已包含构建好的插件。
 
@@ -24,9 +24,7 @@
 ```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugins": [
-    "/absolute/path/to/opencode-navigation-rail",
-  ],
+  "plugins": ["/absolute/path/to/opencode-navigation-rail"],
 }
 ```
 
@@ -44,13 +42,13 @@
 
 键盘操作：
 
-| 操作 | 按键 |
-| --- | --- |
-| 进入或离开导航条 | Tab / Shift+Tab |
-| 上下选择提问 | ↑ / ↓ |
-| 移到第一条或最后一条提问 | Home / End |
-| 跳到选中的提问 | Enter / Space |
-| 关闭预览 | Esc |
+| 操作                     | 按键            |
+| ------------------------ | --------------- |
+| 进入或离开导航条         | Tab / Shift+Tab |
+| 上下选择提问             | ↑ / ↓           |
+| 移到第一条或最后一条提问 | Home / End      |
+| 跳到选中的提问           | Enter / Space   |
+| 关闭预览                 | Esc             |
 
 ## 历史加载
 

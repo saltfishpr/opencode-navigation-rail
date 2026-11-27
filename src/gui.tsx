@@ -1,7 +1,7 @@
-import { Plugin, Slot, Style } from "@opencode/plugin/gui"
-import { Show } from "solid-js"
-import { NavigationRail } from "./navigation-rail"
-import css from "./navigation-rail.css?inline"
+import { Plugin, Slot, Style } from "@opencode/plugin/gui";
+import { Show } from "solid-js";
+import { NavigationRail } from "./navigation-rail";
+import css from "./navigation-rail.css?inline";
 
 const en = {
   rail: "Conversation turns",
@@ -9,7 +9,7 @@ const en = {
   attachment: "Attachment",
   emptyPrompt: "User message",
   reply: "Reply",
-}
+};
 
 const zh = {
   rail: "对话轮次",
@@ -17,14 +17,14 @@ const zh = {
   attachment: "附件",
   emptyPrompt: "用户消息",
   reply: "回复",
-}
+};
 
-export type RailLabel = keyof typeof en
+export type RailLabel = keyof typeof en;
 
 export default Plugin.define({
   i18n: { en, zh },
   setup(ctx) {
-    ctx.add(Style, css)
+    ctx.add(Style, css);
     ctx.add(Slot, {
       at: "session.header",
       render: (input) => (
@@ -32,6 +32,6 @@ export default Plugin.define({
           <NavigationRail session={input.session} t={(key) => ctx.t(key)} path={() => ctx.router.path()} />
         </Show>
       ),
-    })
+    });
   },
-})
+});

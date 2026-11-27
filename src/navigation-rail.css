@@ -26,7 +26,13 @@
   overscroll-behavior: contain;
   overflow-anchor: none;
   scrollbar-width: none;
-  mask-image: linear-gradient(to bottom, transparent, #000 var(--onr-fade-top, 0px), #000 calc(100% - var(--onr-fade-bottom, 0px)), transparent);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 var(--onr-fade-top, 0px),
+    #000 calc(100% - var(--onr-fade-bottom, 0px)),
+    transparent
+  );
 }
 
 .onr-scroll::-webkit-scrollbar {
@@ -68,7 +74,9 @@
   border-radius: 1px;
   background: currentColor;
   opacity: 0.29;
-  transition: width 140ms ease-out, opacity 120ms ease-out;
+  transition:
+    width 140ms ease-out,
+    opacity 120ms ease-out;
 }
 
 .onr:not(:hover):not(:has(.onr-tick:focus-visible)) .onr-tick.onr-visible > span {
